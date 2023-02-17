@@ -1,6 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 import pprint
+import os
+import pandas as pd
+import datetime
 
 class Parser:
 
@@ -56,7 +59,7 @@ class Parser:
         return html_doc
 
         
-    def get_data_club(self, website):
+    def get_data_club(self, club_name, website):
 
         page_content = self.get_web_status(website)
 
@@ -68,7 +71,6 @@ class Parser:
         dates = table.find_all('th')
 
         table_data = []
-        club_fixture = {}
         dates_list = []
 
         for row in rows:
@@ -87,7 +89,12 @@ class Parser:
 
         full_list = list(zip(dates_list, table_data))
 
+        list_of_games = []
+
         for index in range(len(full_list)):
+
+            club_fixture = {}
+
             if len(full_list[index][0]) != 0:
                 date = full_list[index][0][0]
                 club_fixture[date] = {'Time' : full_list[index][1][0], 
@@ -101,17 +108,54 @@ class Parser:
                                         'Expected goals': full_list[index][1][9],
                                         'Expected goals against': full_list[index][1][10],
                                         'Ball possesion': full_list[index][1][11]}
+                club_fixture['Club fixture'] = club_name
+                club_fixture['Date'] = date
+                club_fixture['Time'] = full_list[index][1][0]
+                club_fixture['Round'] = full_list[index][1][2]
+                club_fixture['Venue'] = full_list[index][1][4]
+                club_fixture['Result'] = full_list[index][1][5]
+                club_fixture['Goals Scored'] = full_list[index][1][6]
+                club_fixture['Goals Against'] = full_list[index][1][7]
+                club_fixture['Opponent'] = full_list[index][1][8]
+                club_fixture['Expected Goals'] = full_list[index][1][9]
+                club_fixture['Expected Goals Against'] = full_list[index][1][10]
+                club_fixture['Ball Possesion'] = full_list[index][1][11]
+                club_fixture['Download Time'] = datetime.datetime.now()
+
+                list_of_games.append(club_fixture)
             else:
                 continue
                     
                 
-        return club_fixture
+        return list_of_games
 
     def get_data(self):
         
-        dict_club_fixture = {}
+        list_club_fixture = []
 
         for item in self.dict_clubs.keys():
-            dict_club_fixture[item] = self.get_data_club(self.dict_clubs[item])
+            list_club_fixture.append(self.get_data_club(item, self.dict_clubs[item]))
 
-        return dict_club_fixture
+        return list_club_fixture
+
+    def convert_to_df(self):
+        list_of_df = []
+
+        for item in self.dict_clubs.keys():
+            data = self.get_data_club(item, self.dict_clubs[item])
+            dataframe = pd.DataFrame(data)
+            list_of_df.append(dataframe)
+
+        final_df = pd.concat(list_of_df, ignore_index=True)
+
+        return final_df
+
+    def convert_to_csv(self):
+        
+        data_df = self.convert_to_df()
+        if not os.path.isfile('Fixtures.csv'):
+            load_to_csv_file = data_df.to_csv('Fixtures.csv')
+        else:
+            load_to_csv_file = data_df.to_csv('Fixtures.csv', mode='a', header=False)
+
+        return load_to_csv_file

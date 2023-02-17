@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pprint
+import pandas as pd
 
 class Parser:
 
@@ -51,14 +52,14 @@ class Parser:
         london = london[0:6]
 
         liverpool = self.scrapper_city_name(self.website_content(self.get_web_status(self.page_url_liverpool)), "VwiC3b yXK7lf MUxGbd yDYNvb lyLwlc lEBKkf")
-        liverpool = liverpool[234:243]
+        liverpool = liverpool[:9]
 
         manchester = self.scrapper_city_name(self.website_content(self.get_web_status(self.page_url_manchester)), "GzssTd")
 
         newcastle = self.scrapper_city_name(self.website_content(self.get_web_status(self.page_url_newcastle)), "VwiC3b yXK7lf MUxGbd yDYNvb lyLwlc lEBKkf")
         newcastle = newcastle.replace('\n', '')
         newcastle = newcastle.strip()
-        newcastle = newcastle[144:163]
+        newcastle = newcastle[152:175]
 
         leeds = self.scrapper_city_name(self.website_content(self.get_web_status(self.page_url_leeds)), "VwiC3b yXK7lf MUxGbd yDYNvb lyLwlc lEBKkf")
         leeds = leeds.strip()
@@ -87,7 +88,7 @@ class Parser:
 
         liverpool_height = self.scrapper_city_height(self.website_content(self.get_web_status(self.page_url_liverpool)), "VwiC3b yXK7lf MUxGbd yDYNvb lyLwlc lEBKkf")
         liverpool_height = liverpool_height.replace('\n', '')
-        liverpool_height = liverpool_height[150:153]
+        #liverpool_height = liverpool_height[150:153]
         #liverpool_height = int(liverpool_height)
 
         manchester_height = self.scrapper_city_height(self.website_content(self.get_web_status(self.page_url_manchester)), "VwiC3b yXK7lf MUxGbd yDYNvb lyLwlc lEBKkf")
@@ -121,7 +122,7 @@ class Parser:
 
         dictionary_with_info = {}
 
-        dictionary_with_info[london] = london_height
+        '''dictionary_with_info[london] = london_height
         dictionary_with_info[liverpool] = liverpool_height
         dictionary_with_info[manchester] = manchester_height
         dictionary_with_info[newcastle] = 30
@@ -131,9 +132,46 @@ class Parser:
         dictionary_with_info[birmingham] = birmingham_height
         dictionary_with_info[wolverhampton] = wolverhampton_height
         dictionary_with_info[brighton] = 10
-        dictionary_with_info[southampton] = 21
+        dictionary_with_info[southampton] = 21'''
 
-        return dictionary_with_info
+        list_of_altitudes = []
+
+        list_of_altitudes.append({'Club': "Arsenal",'City': london , "Altitude": london_height})
+        list_of_altitudes.append({'Club': 'Manchester City', 'City': manchester, "Altitude": manchester_height})
+        list_of_altitudes.append({'Club': 'Manchester United', 'City': manchester, "Altitude": manchester_height})
+        list_of_altitudes.append({'Club': 'Newcastle United', 'City': newcastle, "Altitude": 30})
+        list_of_altitudes.append({'Club': 'Tottenham Hotspur', 'City': london, "Altitude": london_height})
+        list_of_altitudes.append({'Club': 'Brighton and Hove Albion', 'City': brighton, "Altitude": 10})
+        list_of_altitudes.append({'Club': 'Brentford', 'City': london, "Altitude": london_height})
+        list_of_altitudes.append({'Club': 'Fulham', 'City': london, "Altitude": london_height})
+        list_of_altitudes.append({'Club': 'Chelsea', 'City': london, "Altitude": london_height})
+        list_of_altitudes.append({'Club': 'Liverpool FC', 'City': liverpool, 'Altitude': 70})
+        list_of_altitudes.append({'Club': 'Aston Villa', 'City': birmingham, "Altitude": birmingham_height})
+        list_of_altitudes.append({'Club': 'Crystal Palace', 'City': london, "Altitude": london_height})
+        list_of_altitudes.append({'Club': 'Nottingham Forest', 'City': nottingham, "Altitude": nottingham_height})
+        list_of_altitudes.append({'Club': 'Leicester City', 'City': leicester, "Altitude": leicester_height})
+        list_of_altitudes.append({'Club': 'Wolverhampton Wanderers', 'City': wolverhampton, "Altitude": wolverhampton_height})
+        list_of_altitudes.append({'Club': 'Leeds United', 'City': leeds, "Altitude": leeds_height})
+        list_of_altitudes.append({'Club': 'West Ham United', 'City': london, "Altitude": london_height})
+        list_of_altitudes.append({'Club': 'Everton', 'City': liverpool, "Altitude": 70})
+        list_of_altitudes.append({'Club': 'Bournemouth', 'City': 'Bournemouth', "Altitude": 19})
+        list_of_altitudes.append({'Club': 'Southampton', 'City': southampton, "Altitude": 21})
+        
+        return list_of_altitudes
+
+
+    def convert_to_df(self):
+        data = self.get_data()
+        dataframe = pd.DataFrame(data)
+
+        return dataframe
+
+    def convert_to_csv(self):
+        
+        data_df = self.convert_to_df()
+        load_to_csv_file = data_df.to_csv('Altitude.csv')
+
+        return load_to_csv_file
 
 object_dict = Parser()
-print(object_dict.get_data())
+print(object_dict.convert_to_csv())
